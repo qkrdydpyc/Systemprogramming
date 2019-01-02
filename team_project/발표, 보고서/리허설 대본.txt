@@ -1,0 +1,61 @@
+프로젝트 리허설을 시작하겠습니다. 우리는 총 8개의 센서를 쓰려고 했지만 역할 분담한 팀원 (우리 둘의)  한계로 인해 6개의 센서만 사용했습니다. 6개의 센서 모두 커널 모듈에서 유기적으로 돌아갑니다. 
+
+6개의 센서는servo motor 2개,  RGB_led, raindrop, light detection, touch, 를 사용합니다.  touch센서는 사람이 집에 있을때 침대에 있는지 없는지를 판단하기 위해서 사용했습니다.  예를들어 사용자가 창문과 커튼을 열고 잠을 잘때 비가 올때 자동으로 닫히거나 낮이 되도 침대에서 깨지 않는다면 커튼이 쳐져있는 
+그런 자동화되는 모델을 만들었습니다.
+
+rgb_led는 어떤 바깥 상황으로 인해 바뀌는지 볼 수 있습니다. rain을 감지하면 파란색으로 조도를 감지하면 초록색 불이 켜지는 것을 볼 수 있습니다.
+
+먼저 프로그램을 시작하면 창문과 커튼의 초기값은 0으로  낮이고 비가 오지 않고 침대위에 아무도 없다는 상태로 시작합니다.
+원래는 가스센서까지 사용해서 17가지의 상황을 목표로 했으나 가스센서의 모듈화에 한계로 인해 3가지 센서 8가지 상황을 재현했습니다. 
+
+먼저 우리가 만든 조건은 실제 사용자가 바꿀 수 있는 조건입니다. 이 모델에 적용한 조건은 앞서 ppt에서 보신 것처럼 설정해 두었고 하나하나 설명하면서 적용해 보겠습니다. 단 창문이 열려있을때 커튼이 닫혀있는 조건 자체를 만들지 않았습니다. 
+
+
+터치 0 비 0 조도 0 일 경우 창문은 열리고 커튼도 열려있습니다
+터치 0 비 0 조도 1 일 경우 창문은 열리고 커튼도 열려있습니다
+이때가 보통 시작할때 초기값으로 시작합니다.
+터치 0 비 1조도 0 일 경우 창문은 닫히고 커튼은 열려있습니다.
+터치 0 비 1 조도 1 일 경우 창문은 열리고 커튼도 열려있습니다
+터치 1 비 0 조도 0 일 경우 창문은 열리고 커튼도 열려있습니다
+터치 1 비 0 조도 1 일 경우 창문은 닫히고 커튼도 닫혀있습니다
+터치 1 비 1 조도 0 일 경우 창문은 닫히고 커튼도 열려있습니다
+터치 1 비 1 조도 1 일 경우 창문은 닫히고 커튼도 닫혀있습니다
+
+이렇게 각 센서에 ioctl로 입출력값을 가져와 창문과 커튼이 서보모터로 열리거나 닫히게 만들었습니다.  감사합니다
+
+ rgb_led는 어떤 색상을 어떻게 할것인지 2개의 값을 넘겨줘서 돌아가도록 만들었습니다. 조도가 감지되면 초록색을 키게 하고 조도를 감지하지 못하면 초록색을 끄게 하는 raindrop도 파란색으로 똑같이 만들었습니다. 
+
+서보모터는 pwm의 주기를 잡아서 3가지 조건의 주기로 0과 1과 2로 정지 cw, ccw로 일정한 시간 돌아가게 만들어서 창문과 커튼을 움직이게 했습니다. 
+
+Let's begin the project rehearsal. We tried to use a total of eight sensors, but only six of them were used due to the limitations of the coding of the team members who divided the roles. All six sensors return organically to the kernel module. 
+
+The six sensors are two Servo motors, RGB_led, raindrop, light detection, touch, 
+Touch sensors are used to determine whether a person is in bed when at home. For example, if it rains when you sleep with windows and curtains open, 
+The model will automatically close windows and curtains.
+If the user does not wake up from the bed when the light goes down, the curtain goes down. 
+We've created that automated model.
+
+rgb_led can see what external situation change. If you detect a lane, you can see that the light turns green when you detect the rain led is blue.
+
+Before starting the program, the initial value of the windows and curtains is zero(closed), with no rain coming, and no one on the bed, and light on
+Originally, we used gas sensors to target 17 situations, but due to limitations in modularizing the gas sensors, we have recreated 8 different sensor situations.
+
+First, the conditions that we've created are conditions that can be changed by the actual user. The conditions for this model have been set up as you saw on ppt, and I'll explain them one by one. However, we did not create the condition that the curtain was closed when the window was open. 
+
+
+If touch 0 ratio 0 illumination is 0 the window opens and the curtain is also open
+If touch 0 ratio 0 illumination is 1 the window opens and the curtain is also open
+This usually starts with the initial value at the beginning.
+If touch 0 ratio 1 degree 0, the window is closed and the curtain is open.
+If the touch 0 ratio 1 illumination level is 1 the window opens and the curtain is also open
+If touch 1 ratio 0 illumination is 0 the window opens and the curtain is also open
+If touch 1 ratio 0 illumination is 1 the window is closed and the curtain is closed.
+If touch 1 ratio 1 division 0 the window is closed and the curtain is open
+If the touch 1 ratio is 1 degree 1 the window is closed and the curtain is closed.
+
+So we took the input and output values from the ioctl to each sensor, and the windows and curtains open or close with the servo motor. Thank you.
+
+rgb_led gave me two values for what color I was going to do. And if it's detected, it turns green, and if it's not detected, it's also blue. 
+
+The servo motor took a period of pwm and made the windows and curtains move by rotating the stop cw, ccw, 0 and 1 and 2 at a regular interval of three conditions.
+
